@@ -1,9 +1,11 @@
+##READ ME: Functions work based off of inputing what times you want to sample, it finds the index that these times correspond to in the ECG and respiration signal
+## output is the section that you want. 
+## example uses are below the functions. 
+
 import numpy as np
-from numpy.fft import fft,ifft
 import pandas as pd
 import os
-import matplotlib.pyplot as plt
-import neurokit2 as nk
+
 
 def ECG_section(folder,file,start_time,stop_time):
     access_folder = os.chdir(folder)
@@ -18,6 +20,28 @@ def ECG_section(folder,file,start_time,stop_time):
     section = ECG[start_position:stop_position+1]
     return section
 
-section = ECG_section('ECG_Resp','a01',1810,1870)
-print(section)
+##Example use:
+# section = ECG_section('ECG_Resp','a01',1810,1870)
+
+
+def Resp_section(folder,file,start_time,stop_time):
+    access_folder = os.chdir(folder)
+    df = pd.read_csv(file+'.csv')
+
+    Time = np.concatenate(pd.DataFrame(df['Time']).to_numpy())
+    Time_List = Time.tolist()
+    start_position = Time_List.index(start_time)
+    stop_position = Time_List.index(stop_time)
+    print(start_position)
+    print(stop_position)
+    
+    RespA = np.concatenate(pd.DataFrame(df['Resp A'][start_position:stop_position+1]).to_numpy())
+    RespC = np.concatenate(pd.DataFrame(df['Resp C'][start_position:stop_position+1]).to_numpy())
+    RespN = np.concatenate(pd.DataFrame(df['Resp N'][start_position:stop_position+1]).to_numpy())
+    SpO2 = np.concatenate(pd.DataFrame(df['SpO2'][start_position:stop_position+1]).to_numpy())
+
+    return RespA, RespC, RespN, SpO2
+
+##Example use:
+# RespA,RespC,RespN,SpO2 = Resp_section('ECG_Resp','a01',1810,1870)
 
