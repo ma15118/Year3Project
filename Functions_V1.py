@@ -76,7 +76,13 @@ def N_sections(folder,file):
         
     return sections,No_sections,max_len
 
-
+def Section_Start_End(folder,file):
+    start_end = []
+    sections,No_sections,max_len = N_sections(folder,file)
+    for section in sections:
+        start_end.append([section[0],section[len(section)-1]])
+    return start_end 
+            
 
 def N_sections_folder(folder):
     compare = []
