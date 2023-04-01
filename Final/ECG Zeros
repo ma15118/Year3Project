@@ -1,0 +1,38 @@
+## This code uses Scipy Interpolate Cubic Spline to identify and remove zeros from the ECG signal by interpolation. 
+##A new column with the interpolated signal is added to the CSV. The CSV is saved under new name. 
+
+import pandas as pd
+import os
+from scipy.interpolate import CubicSpline
+import numpy as np
+import matplotlib.pyplot as plt 
+
+folder = 'ECG_Resp'
+file = 'a01'
+
+if os.path.basename(os.getcwd())!= folder:
+    os.chdir(folder)
+if not file.endswith('.csv'):
+    filename = file
+    file +='.csv'
+
+
+df = pd.read_csv(file)
+print(df)
+
+df['Interpolated ECG'] = df['ECG'].copy()
+Time = df['Time']
+
+zero_index = df['Interpolated ECG'] == 0
+
+cs = CubicSpline(Time[~zero_index], df['Interpolated ECG'][~zero_index])
+
+
+df.loc[zero_index, 'Interpolated ECG'] = cs(Time[zero_index])
+
+print(df)
+
+
+df.to_csv(filename+'_noZeros.csv', index=False)
+
+
