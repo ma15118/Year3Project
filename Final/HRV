@@ -1,0 +1,52 @@
+import pandas as pd
+import os
+from scipy.interpolate import CubicSpline
+import numpy as np
+import matplotlib.pyplot as plt
+from Functions_V2 import *
+
+folder = 'ECG_Resp'
+file = 'a01_noZeros_HRV'
+filename = 'a01'
+
+
+if os.path.basename(os.getcwd())!= folder:
+    os.chdir(folder)
+if not file.endswith('.csv'):
+    filename = file
+    file +='.csv'
+
+df = pd.read_csv(file)
+
+start_time = 1800.01
+stop_time = 2800.01
+
+start_position = (df.loc[df['Time'] == start_time].index)[0]
+stop_position = (df.loc[df['Time'] == stop_time].index)[0]
+
+section = df['Peaks'][start_position:stop_position]
+
+locations = section.where(section ==1).notna()
+index = locations.index[locations].tolist()
+
+RR_intervals = (np.diff(index))/100
+
+q1, q3 = np.percentile(RR_intervals, [25, 75])
+iqr = q3 - q1
+lower_bound = q1 - (1.5 * iqr)
+upper_bound = q3 + (1.5 * iqr)
+outliers = np.where((RR_intervals < lower_bound) | (RR_intervals > upper_bound))[0]
+
+time = np.linspace(start_time, stop_time, len(RR_intervals))
+
+for i in outliers:
+    RR_intervals[i] = 0
+
+zeros = outliers
+##print(zeros)
+##print(time[zeros])
+##print(time[~zeros])
+
+cs = CubicSpline(time[zeros], RR_intervals[zeros])
+df.loc[zeros,'HRV'] = cs(time[zeros])
+print(df['HRV'][99])
