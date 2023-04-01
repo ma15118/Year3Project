@@ -1,0 +1,34 @@
+import pandas as pd
+import os
+from scipy.interpolate import CubicSpline
+import numpy as np
+import matplotlib.pyplot as plt
+from Functions_V2 import *
+
+folder = 'ECG_Resp'
+file = 'a01_noZeros'
+
+
+if os.path.basename(os.getcwd())!= folder:
+    os.chdir(folder)
+if not file.endswith('.csv'):
+    filename = file
+    file +='.csv'
+
+
+df = pd.read_csv(file)
+#print(df)
+
+peaks = R_peaks(folder,file)
+
+
+hold = np.zeros(len(df['ECG']))
+
+for peak_location in peaks:
+    hold[peak_location] = 1
+
+df['Peaks'] = hold
+
+df.to_csv(filename+'_HRV.csv', index=False)
+
+
